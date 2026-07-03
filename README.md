@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Set Free Gala
 
-## Getting Started
+A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stripe-powered donations (one-time and monthly).
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 16 (App Router, Turbopack) + React 19
+- Tailwind CSS v4
+- Stripe Checkout (hosted) via the `stripe` Node SDK
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Getting started
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install dependencies:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   pnpm install
+   ```
 
-## Learn More
+2. Configure Stripe. Copy `.env.example` to `.env.local` and set your key:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   STRIPE_SECRET_KEY=rk_... # restricted key preferred, sk_... also works
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   Don't have keys? Run `stripe sandbox create` with the [Stripe CLI](https://docs.stripe.com/stripe-cli) to provision a temporary sandbox. Claim it with `stripe sandbox claim` before it expires.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Run the dev server:
 
-## Deploy on Vercel
+   ```bash
+   pnpm dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## How donations work
+
+- The donate section (`components/DonateSection.tsx`) posts to a server action (`app/actions.ts`) with an amount and frequency.
+- The action creates a Stripe Checkout Session (`mode: payment` for one-time gifts, `mode: subscription` for monthly) and redirects to Stripe's hosted checkout.
+- After payment, Stripe redirects to `/donate/success`, which verifies the session server-side before showing the thank-you page.
+
+Test card in sandbox/test mode: `4242 4242 4242 4242`, any future expiry, any CVC and ZIP.
+
+## Going live
+
+- Replace the sandbox key in `.env.local` with a restricted live key from the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
+- Review Stripe's [go-live checklist](https://docs.stripe.com/get-started/checklist/go-live).

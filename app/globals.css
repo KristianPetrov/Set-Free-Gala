@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-ink: #050505;
+  --color-ink-soft: #0d0b07;
+  --color-paper: #f3ead7;
+  --color-paper-dim: #a89a7c;
+  --color-gold: #d4af5e;
+  --color-gold-bright: #f0d68a;
+  --color-gold-deep: #9a7b32;
+  --color-line: rgba(212, 175, 94, 0.28);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-cinzel);
+  --font-serif-italic: var(--font-playfair);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Metallic gold gradient text, echoing the flyer's foil lettering */
+.gold-text {
+  background: linear-gradient(
+    175deg,
+    #f6e3a3 0%,
+    #d4af5e 35%,
+    #a5824a 55%,
+    #e9cd7f 75%,
+    #c19a4b 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Double-ruled Art Deco frame */
+.deco-frame {
+  position: relative;
+  border: 1px solid rgba(212, 175, 94, 0.55);
+  box-shadow: inset 0 0 0 4px var(--color-ink),
+    inset 0 0 0 5px rgba(212, 175, 94, 0.35);
+}
+
+.deco-frame-paper {
+  position: relative;
+  border: 1px solid rgba(80, 60, 20, 0.55);
+  box-shadow: inset 0 0 0 4px var(--color-paper),
+    inset 0 0 0 5px rgba(80, 60, 20, 0.35);
+}
+
+/* Ornamental divider: ── ◆ ── */
+.deco-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-gold);
+}
+
+.deco-divider::before,
+.deco-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(
+    to var(--divider-dir, right),
+    transparent,
+    rgba(212, 175, 94, 0.6)
+  );
+}
+
+.deco-divider::before {
+  --divider-dir: right;
+}
+
+.deco-divider::after {
+  --divider-dir: left;
+}
+
+/* Subtle deco sunburst backdrop */
+.deco-rays {
+  background-image: repeating-conic-gradient(
+    from 0deg at 50% 120%,
+    rgba(212, 175, 94, 0.06) 0deg 4deg,
+    transparent 4deg 12deg
+  );
+}
+
+/* Film-grain overlay for depth on pure black */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 9s steps(10) infinite;
+}
+
+@keyframes grain-shift {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3%, -5%); }
+  30% { transform: translate(4%, 2%); }
+  50% { transform: translate(-2%, 6%); }
+  70% { transform: translate(5%, -3%); }
+  90% { transform: translate(-4%, 4%); }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes slow-spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-up {
+  animation: fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+.animate-slow-spin {
+  animation: slow-spin 24s linear infinite;
+}
+
+/* Scroll-triggered reveal (toggled by the Reveal component) */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain::before,
+  .animate-marquee,
+  .animate-slow-spin {
+    animation: none;
+  }
+  .animate-fade-up {
+    animation-duration: 0.01ms;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
