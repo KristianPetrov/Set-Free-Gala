@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Cinzel } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +24,11 @@ const cinzel = Cinzel({
   weight: ["400", "500", "600", "700"],
 });
 
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#050505",
+};
+
 export const metadata: Metadata = {
   title: "Set Free's 1st Gala — Sunday July 26 · 6 PM",
   description:
@@ -44,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${cinzel.variable} h-full scroll-smooth antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${cinzel.variable} h-full scroll-smooth bg-ink antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ink text-paper selection:bg-gold selection:text-ink">
         {children}

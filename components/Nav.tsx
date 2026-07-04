@@ -9,7 +9,7 @@ const links = [
 
 export function Nav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-line bg-ink/70 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-ink pt-[env(safe-area-inset-top,0px)] before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-screen before:bg-ink before:content-['']">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           href="/"
