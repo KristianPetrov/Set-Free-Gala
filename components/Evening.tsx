@@ -7,22 +7,22 @@ const schedule = [
     detail: "Arrival, reception, and the silent auction opens.",
   },
   {
-    time: "7:00 PM",
+    time: "6:30 PM",
     title: "Dinner Is Served",
     detail: "A seated dinner at the Set Free Palace.",
   },
   {
-    time: "8:00 PM",
+    time: "7:00 PM",
     title: "Tim Storey",
     detail: "An evening with our special guest speaker.",
   },
   {
-    time: "9:00 PM",
+    time: "7:30 PM",
     title: "Stories of Freedom",
     detail: "Hear directly from lives changed by this work.",
   },
   {
-    time: "9:45 PM",
+    time: "8:00 PM",
     title: "Silent Auction Closes",
     detail: "Final bids, and the moment the room becomes a movement.",
   },
