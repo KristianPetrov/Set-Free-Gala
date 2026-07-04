@@ -18,7 +18,7 @@ export async function createDonationSession(formData: FormData) {
   const amountCents = Math.round(amountDollars * 100);
   if (amountCents < MIN_AMOUNT_CENTS || amountCents > MAX_AMOUNT_CENTS) {
     throw new Error("Donation amount must be between $1 and $999,999.");
-  }
+  } 
 
   const origin =
     (await headers()).get("origin") ?? "http://localhost:3000";

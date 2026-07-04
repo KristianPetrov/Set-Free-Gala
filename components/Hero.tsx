@@ -1,3 +1,5 @@
+import { HeroHosts } from "./HeroHosts";
+
 export function Hero() {
   return (
     <section className="deco-rays relative flex min-h-svh flex-col justify-center overflow-hidden px-6 pt-24 pb-16">
@@ -94,13 +96,8 @@ export function Hero() {
           </a>{" "}
           for tickets
         </p>
-      </div>
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.4em] text-paper-dim"
-      >
-        Scroll
+        <HeroHosts />
       </div>
     </section>
   );

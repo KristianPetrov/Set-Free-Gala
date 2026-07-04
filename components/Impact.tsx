@@ -12,7 +12,7 @@ export function Impact() {
     <section id="impact" className="mx-auto max-w-6xl scroll-mt-24 px-6 py-32">
       <Reveal>
         <p className="text-[11px] uppercase tracking-[0.5em] text-gold">
-          04 — Where It Goes
+          05 — Where It Goes
         </p>
         <h2 className="mt-8 max-w-3xl font-display text-4xl leading-tight md:text-6xl">
           Every dollar has{" "}

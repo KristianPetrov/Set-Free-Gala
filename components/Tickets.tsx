@@ -34,7 +34,7 @@ export function Tickets() {
       <div className="mx-auto max-w-6xl px-6 py-32">
         <Reveal>
           <p className="text-center text-[11px] uppercase tracking-[0.5em] text-gold">
-            02 — Tickets &amp; Sponsorships
+            03 — Tickets &amp; Sponsorships
           </p>
           <h2 className="gold-text mx-auto mt-8 max-w-3xl text-center font-display text-4xl uppercase leading-tight tracking-[0.06em] md:text-6xl">
             Reserve Your Seat

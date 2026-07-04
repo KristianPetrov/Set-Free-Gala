@@ -38,7 +38,7 @@ export function Evening() {
         <div className="grid gap-16 md:grid-cols-12">
           <Reveal className="md:col-span-4">
             <p className="text-[11px] uppercase tracking-[0.5em] text-gold">
-              03 — The Evening
+              04 — The Evening
             </p>
             <h2 className="mt-8 font-display text-4xl leading-tight md:text-5xl">
               One night,{" "}

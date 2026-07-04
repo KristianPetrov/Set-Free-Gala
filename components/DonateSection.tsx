@@ -50,7 +50,7 @@ export function DonateSection() {
         <div className="grid gap-16 lg:grid-cols-12">
           <Reveal className="lg:col-span-5">
             <p className="text-[11px] uppercase tracking-[0.5em] text-ink/50">
-              05 — Give
+              06 — Give
             </p>
             <h2 className="mt-8 font-display text-4xl leading-tight md:text-6xl">
               Your gift is{" "}
