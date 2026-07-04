@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export const metadata = {
   title: "Thank You — Set Free Gala",
@@ -17,7 +17,7 @@ export default async function DonationSuccessPage({
     redirect("/#donate");
   }
 
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const session = await getStripe().checkout.sessions.retrieve(sessionId);
 
   if (session.status !== "complete") {
     redirect("/#donate");

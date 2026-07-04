@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const MIN_AMOUNT_CENTS = 100; // $1
 const MAX_AMOUNT_CENTS = 99_999_900; // $999,999
@@ -23,7 +23,7 @@ export async function createDonationSession(formData: FormData) {
   const origin =
     (await headers()).get("origin") ?? "http://localhost:3000";
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: monthly ? "subscription" : "payment",
     ...(monthly ? {} : { submit_type: "donate" as const }),
     line_items: [
