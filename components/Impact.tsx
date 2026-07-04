@@ -24,9 +24,9 @@ export function Impact() {
 
       <div className="mt-16 grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
-          <Reveal key={stat.value} delay={i * 100} className="bg-ink">
-            <div className="flex h-full flex-col justify-between gap-10 p-8 transition-colors hover:bg-ink-soft">
-              <span className="gold-text font-display text-4xl uppercase tracking-[0.06em]">
+          <Reveal key={stat.value} delay={i * 100} className="min-w-0 bg-ink">
+            <div className="@container flex h-full flex-col justify-between gap-10 p-8 transition-colors hover:bg-ink-soft">
+              <span className="gold-text font-display text-[clamp(1.375rem,10cqw,2.25rem)] uppercase tracking-[0.06em]">
                 {stat.value}
               </span>
               <span className="text-sm leading-relaxed text-paper-dim">
