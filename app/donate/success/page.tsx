@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getStripe } from "@/lib/stripe";
 
-export const metadata = {
-  title: "Thank You — Set Free Gala",
+export const metadata: Metadata = {
+  title: "Thank You",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function DonationSuccessPage({

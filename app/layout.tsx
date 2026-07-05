@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Cinzel } from "next/font/google";
+import { siteUrl, siteName, siteTitle, siteDescription } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,14 +31,61 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Set Free's 1st Gala — Sunday July 26 · 6 PM",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteTitle,
+    template: `%s — ${siteName}`,
+  },
   description:
     "Join Set Free for its first annual gala at the Set Free Palace in Anaheim, featuring special guest Tim Storey. Black and white formal attire. Tables, tickets, and sponsorships available — every dollar funds food, clothing, shelter, and daily outreach.",
+  applicationName: siteName,
+  category: "events",
+  keywords: [
+    "Set Free Gala",
+    "Set Free",
+    "gala",
+    "charity gala",
+    "fundraiser",
+    "Tim Storey",
+    "Set Free Palace",
+    "Anaheim",
+    "black tie",
+    "outreach",
+    "donations",
+  ],
+  authors: [{ name: "Set Free" }],
+  creator: "Set Free",
+  publisher: "Set Free",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Set Free's 1st Gala — Sunday July 26 · 6 PM",
+    type: "website",
+    url: "/",
+    siteName,
+    locale: "en_US",
+    title: siteTitle,
     description:
       "An evening at the Set Free Palace with special guest Tim Storey. Silent auction, tables, tickets, and sponsorships — every dollar funds food, clothing, shelter, and daily outreach.",
-    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
