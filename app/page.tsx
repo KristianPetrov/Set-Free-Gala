@@ -9,6 +9,7 @@ import { Evening } from "@/components/Evening";
 import { Impact } from "@/components/Impact";
 import { DonateSection } from "@/components/DonateSection";
 import { Footer } from "@/components/Footer";
+import { ticketProducts } from "@/lib/products";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -41,44 +42,15 @@ const jsonLd = {
         name: "Tim Storey",
       },
       organizer: { "@id": `${siteUrl}/#organization` },
-      offers: [
-        {
-          "@type": "Offer",
-          name: "Ticket",
-          price: "100",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-          url: `${siteUrl}/#tickets`,
-          validFrom: "2026-06-01T00:00:00-07:00",
-        },
-        {
-          "@type": "Offer",
-          name: "Table",
-          price: "1000",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-          url: `${siteUrl}/#tickets`,
-          validFrom: "2026-06-01T00:00:00-07:00",
-        },
-        {
-          "@type": "Offer",
-          name: "Sponsorship — Table + Banner Logo",
-          price: "1000",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-          url: `${siteUrl}/#tickets`,
-          validFrom: "2026-06-01T00:00:00-07:00",
-        },
-        {
-          "@type": "Offer",
-          name: "Sponsorship — Two Tickets + Banner Logo",
-          price: "500",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-          url: `${siteUrl}/#tickets`,
-          validFrom: "2026-06-01T00:00:00-07:00",
-        },
-      ],
+      offers: ticketProducts.map((product) => ({
+        "@type": "Offer",
+        name: product.title,
+        price: String(product.unitAmount / 100),
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: `${siteUrl}/#tickets`,
+        validFrom: "2026-06-01T00:00:00-07:00",
+      })),
     },
     {
       "@type": "Organization",

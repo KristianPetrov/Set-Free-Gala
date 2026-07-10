@@ -1,31 +1,100 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { createTicketSession } from "@/app/actions";
+import { ticketProducts, type TicketProductId } from "@/lib/products";
 import { Reveal } from "./Reveal";
 
-const tiers = [
-  {
-    price: "$100",
-    title: "Ticket",
-    detail: "One seat for an unforgettable evening at the Set Free Palace.",
-  },
-  {
-    price: "$1,000",
-    title: "Table",
-    detail: "A full table for your family, friends, church, or crew.",
-  },
-  {
-    price: "$1,000",
-    title: "Sponsor",
-    detail: "One table for your party plus your logo featured on the banner.",
-    badge: "Sponsorship",
-  },
-  {
-    price: "$500",
-    title: "Sponsor",
-    detail: "Two tickets plus your logo featured on the banner.",
-    badge: "Sponsorship",
-  },
-];
+function validateLogo(file: File | null) {
+  if (!file) {
+    return "Please upload your sponsor logo.";
+  }
+
+  if (!["image/jpeg", "image/png"].includes(file.type)) {
+    return "Logo must be a PNG or JPG image.";
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    return "Logo must be 5MB or smaller.";
+  }
+
+  return null;
+}
 
 export function Tickets() {
+  const [selectedId, setSelectedId] = useState<TicketProductId>("ticket");
+  const [quantity, setQuantity] = useState(1);
+  const [sponsorName, setSponsorName] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const selectedProduct =
+    ticketProducts.find((product) => product.id === selectedId) ??
+    ticketProducts[0];
+  const total = selectedProduct.unitAmount * quantity;
+  const totalLabel = (total / 100).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+  function submit() {
+    setError(null);
+
+    if (selectedProduct.requiresSponsorLogo) {
+      const name = sponsorName.trim();
+      const logoError = validateLogo(logoFile);
+
+      if (!name) {
+        setError("Please enter the sponsor or company name.");
+        return;
+      }
+
+      if (logoError) {
+        setError(logoError);
+        return;
+      }
+    }
+
+    startTransition(async () => {
+      try {
+        let logoUrl = "";
+
+        if (selectedProduct.requiresSponsorLogo && logoFile) {
+          const uploadFormData = new FormData();
+          uploadFormData.set("file", logoFile);
+
+          const response = await fetch("/api/upload-logo", {
+            method: "POST",
+            body: uploadFormData,
+          });
+          const payload = (await response.json()) as {
+            url?: string;
+            error?: string;
+          };
+
+          if (!response.ok || !payload.url) {
+            setError(payload.error ?? "Unable to upload logo. Please try again.");
+            return;
+          }
+
+          logoUrl = payload.url;
+        }
+
+        const formData = new FormData();
+        formData.set("productId", selectedProduct.id);
+        formData.set("quantity", String(quantity));
+        formData.set("sponsorName", sponsorName.trim());
+        formData.set("logoUrl", logoUrl);
+
+        await createTicketSession(formData);
+      } catch {
+        setError("Something went wrong starting checkout. Please try again.");
+      }
+    });
+  }
+
   return (
     <section
       id="tickets"
@@ -45,45 +114,150 @@ export function Tickets() {
         </Reveal>
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {tiers.map((tier, i) => (
-            <Reveal key={`${tier.title}-${tier.price}`} delay={i * 100}>
-              <div className="deco-frame flex h-full flex-col gap-6 bg-ink p-8 pt-10 text-center transition-colors hover:bg-ink-soft">
-                {tier.badge ? (
-                  <span className="mx-auto -mt-2 text-[10px] uppercase tracking-[0.35em] text-gold">
-                    {tier.badge}
+          {ticketProducts.map((tier, i) => {
+            const selected = tier.id === selectedId;
+
+            return (
+              <Reveal key={tier.id} delay={i * 100}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(tier.id);
+                    setQuantity(1);
+                    setError(null);
+                  }}
+                  aria-pressed={selected}
+                  className={`deco-frame flex h-full w-full flex-col gap-6 bg-ink p-8 pt-10 text-center transition-colors hover:bg-ink-soft ${
+                    selected ? "ring-1 ring-gold" : ""
+                  }`}
+                >
+                  <span
+                    className={`mx-auto -mt-2 text-[10px] uppercase tracking-[0.35em] ${
+                      tier.requiresSponsorLogo ? "text-gold" : "text-paper-dim"
+                    }`}
+                  >
+                    {tier.categoryLabel}
                   </span>
-                ) : (
-                  <span className="mx-auto -mt-2 text-[10px] uppercase tracking-[0.35em] text-paper-dim">
-                    Admission
+                  <span className="gold-text font-display text-5xl">
+                    {tier.priceLabel}
                   </span>
-                )}
-                <span className="gold-text font-display text-5xl">
-                  {tier.price}
-                </span>
-                <span className="font-display text-lg uppercase tracking-[0.25em] text-paper">
-                  {tier.title}
-                </span>
-                <span className="text-sm leading-relaxed text-paper-dim">
-                  {tier.detail}
-                </span>
-              </div>
-            </Reveal>
-          ))}
+                  <span className="font-display text-lg uppercase tracking-[0.25em] text-paper">
+                    {tier.title}
+                  </span>
+                  <span className="text-sm leading-relaxed text-paper-dim">
+                    {tier.detail}
+                  </span>
+                </button>
+              </Reveal>
+            );
+          })}
         </div>
 
         <Reveal delay={200}>
-          <div className="mt-16 flex flex-col items-center gap-6 text-center">
-            <p className="max-w-xl text-sm leading-relaxed text-paper-dim">
+          <div className="mx-auto mt-16 max-w-3xl border border-line bg-ink p-8 md:p-12">
+            <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.35em] text-gold">
+                  Selected
+                </p>
+                <span className="font-display text-lg uppercase tracking-[0.25em] text-paper">
+                  {selectedProduct.title}
+                </span>
+                <p className="mt-3 max-w-lg text-sm leading-relaxed text-paper-dim">
+                  {selectedProduct.detail}
+                </p>
+              </div>
+
+              {selectedProduct.quantityAllowed && (
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-paper-dim">
+                    Quantity
+                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    inputMode="numeric"
+                    value={quantity}
+                    onChange={(event) => {
+                      const next = Number.parseInt(event.target.value, 10);
+                      setQuantity(Number.isFinite(next) ? next : 1);
+                    }}
+                    className="mt-3 w-28 border border-line bg-transparent px-4 py-3 text-center font-display text-2xl text-paper outline-none focus:border-gold"
+                    aria-label="Quantity"
+                  />
+                </label>
+              )}
+            </div>
+
+            {selectedProduct.requiresSponsorLogo && (
+              <div className="mt-8 grid gap-6 md:grid-cols-2">
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-paper-dim">
+                    Sponsor Name
+                  </span>
+                  <input
+                    type="text"
+                    value={sponsorName}
+                    onChange={(event) => setSponsorName(event.target.value)}
+                    placeholder="Company, church, or family name"
+                    className="mt-3 w-full border border-line bg-transparent px-4 py-4 text-sm text-paper outline-none placeholder:text-paper-dim/60 focus:border-gold"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-[0.3em] text-paper-dim">
+                    Sponsor Logo
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    onChange={(event) =>
+                      setLogoFile(event.target.files?.[0] ?? null)
+                    }
+                    className="mt-3 w-full border border-line bg-transparent px-4 py-3 text-sm text-paper file:mr-4 file:border-0 file:bg-gold file:px-4 file:py-2 file:text-[10px] file:uppercase file:tracking-[0.25em] file:text-ink"
+                  />
+                  <span className="mt-2 block text-xs text-paper-dim">
+                    PNG or JPG, 5MB max.
+                  </span>
+                </label>
+              </div>
+            )}
+
+            {error && (
+              <p className="mt-6 text-center text-sm text-paper" role="alert">
+                {error}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-col items-center gap-4 text-center">
+              <button
+                type="button"
+                onClick={submit}
+                disabled={pending || quantity < 1 || quantity > 20}
+                className="w-full bg-gold px-10 py-5 text-[11px] uppercase tracking-[0.3em] text-ink transition-opacity hover:opacity-80 disabled:opacity-50 md:w-auto"
+              >
+                {pending ? "Opening Secure Checkout..." : `Buy ${totalLabel}`}
+              </button>
+              <p className="max-w-xl text-xs leading-relaxed text-paper-dim">
+                You&rsquo;ll be redirected to Stripe&rsquo;s secure checkout.
+                Receipts are sent by email after payment.
+              </p>
+              <a
+                href="sms:+17144004573"
+                className="text-[10px] uppercase tracking-[0.3em] text-gold underline underline-offset-4"
+              >
+                Prefer to text? +1 (714) 400-4573
+              </a>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={250}>
+          <div className="mt-12 text-center">
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-paper-dim">
               A silent auction runs throughout the evening — come ready to bid.
-              To reserve tickets, tables, or a sponsorship, text us and
-              we&rsquo;ll take care of the rest.
             </p>
-            <a
-              href="sms:+17144004573"
-              className="bg-gold px-10 py-5 text-[11px] uppercase tracking-[0.3em] text-ink transition-opacity hover:opacity-80"
-            >
-              Text +1 (714) 400-4573 for Tickets
-            </a>
           </div>
         </Reveal>
       </div>

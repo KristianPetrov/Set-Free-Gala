@@ -1,19 +1,30 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
 import chiefTimGala from "@/public/chief-tim-gala.png";
+import philGoToHeaven from "@/public/phil-go-to-heaven.png";
+import timStoreyPortrait from "@/public/tim-storey.png";
 
 type HostId = "phil" | "tim";
+type HostStory = {
+  name: string;
+  role: string;
+  quote: string;
+  paragraphs: string[];
+  image: StaticImageData;
+  imageAlt: string;
+  imagePosition: string;
+};
 
-const stories: Record<
-  HostId,
-  { name: string; role: string; quote: string; paragraphs: string[] }
-> = {
+const stories: Record<HostId, HostStory> = {
   phil: {
     name: "Pastor Phil Aguilar",
     role: "Founder, Set Free",
     quote: "If God can set me free, He can set anybody free.",
+    image: philGoToHeaven,
+    imageAlt: "Pastor Phil Aguilar smiling in a black suit and sunglasses",
+    imagePosition: "44% top",
     paragraphs: [
       "Phil's story doesn't begin in a church — it begins on the streets of Southern California. Gangs, drugs, violence, and eventually a prison cell: by the world's measure, his life was already written off. It was behind bars, at his lowest, that God reached him — and everything changed.",
       "In 1982 he founded Set Free in Anaheim, a church for the people most churches overlooked — bikers, addicts, gang members, ex-cons, and the homeless. With tattoos, a Harley, and a message of radical grace, Pastor Phil built a ministry that meets people exactly where they are.",
@@ -24,6 +35,9 @@ const stories: Record<
     name: "Tim Storey",
     role: "Special Guest Speaker",
     quote: "A setback is a setup for a comeback.",
+    image: timStoreyPortrait,
+    imageAlt: "Tim Storey smiling in a black tuxedo",
+    imagePosition: "50% top",
     paragraphs: [
       "Tim Storey learned about loss early. Raised in a small home in Southern California, one of five children, he lost his father in a car accident when he was just ten years old. Out of that heartbreak grew an unshakable conviction: God specializes in comebacks.",
       "Today Tim is an acclaimed author, speaker, and life coach — the original “Comeback Coach” — who has inspired audiences in more than seventy-five countries. From world leaders and Hall of Fame athletes to Hollywood's biggest names, he has helped people at every level turn their setbacks into comebacks.",
@@ -139,32 +153,49 @@ export function HeroHosts() {
             onClick={() => setOpenHost(null)}
             className="absolute inset-0 cursor-default bg-black/85 backdrop-blur-sm"
           />
-          <div className="deco-frame relative max-h-[85svh] w-full max-w-2xl overflow-y-auto bg-ink-soft px-6 py-10 text-left md:px-12 md:py-14">
+          <div className="deco-frame relative grid max-h-[88svh] w-full max-w-5xl overflow-y-auto bg-ink-soft text-left md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <button
               type="button"
               autoFocus
               aria-label="Close story"
               onClick={() => setOpenHost(null)}
-              className="absolute top-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center border border-line text-gold transition-colors hover:border-gold hover:text-gold-bright"
+              className="absolute top-4 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center border border-line bg-ink/80 text-gold transition-colors hover:border-gold hover:text-gold-bright"
             >
               ✕
             </button>
-            <p className="text-[10px] uppercase tracking-[0.5em] text-gold">
-              {story.role}
-            </p>
-            <h3 className="mt-4 pr-12 font-display text-3xl tracking-widest text-paper uppercase md:text-4xl">
-              {story.name}
-            </h3>
-            <div className="deco-divider mt-6 max-w-40 text-xs" aria-hidden>
-              ◆
+            <div className="relative min-h-[22rem] overflow-hidden border-b border-line md:min-h-[38rem] md:border-r md:border-b-0">
+              <Image
+                src={story.image}
+                alt={story.imageAlt}
+                fill
+                sizes="(max-width: 768px) calc(100vw - 2rem), 26rem"
+                placeholder="blur"
+                className="object-cover"
+                style={{ objectPosition: story.imagePosition }}
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-ink-soft via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-ink-soft/70"
+              />
             </div>
-            <p className="mt-8 font-serif-italic text-xl leading-snug italic text-gold-bright md:text-2xl">
-              &ldquo;{story.quote}&rdquo;
-            </p>
-            <div className="mt-8 space-y-5 text-sm leading-relaxed text-paper-dim">
-              {story.paragraphs.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+            <div className="px-6 py-9 md:px-10 md:py-12">
+              <p className="text-[10px] uppercase tracking-[0.5em] text-gold">
+                {story.role}
+              </p>
+              <h3 className="mt-4 pr-12 font-display text-3xl tracking-widest text-paper uppercase md:text-4xl">
+                {story.name}
+              </h3>
+              <div className="deco-divider mt-6 max-w-40 text-xs" aria-hidden>
+                ◆
+              </div>
+              <p className="mt-8 font-serif-italic text-xl leading-snug italic text-gold-bright md:text-2xl">
+                &ldquo;{story.quote}&rdquo;
+              </p>
+              <div className="mt-8 space-y-5 text-sm leading-relaxed text-paper-dim">
+                {story.paragraphs.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
         </div>
