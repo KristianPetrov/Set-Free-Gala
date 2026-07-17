@@ -3,6 +3,7 @@ import "server-only";
 import { createElement } from "react";
 import { Resend } from "resend";
 import type Stripe from "stripe";
+import { DonationNotifyEmail } from "@/emails/donation-notify";
 import { DonationReceiptEmail } from "@/emails/donation-receipt";
 import { TicketReceiptEmail } from "@/emails/ticket-receipt";
 import { formatUsd, getTicketProduct } from "@/lib/products";
@@ -68,13 +69,16 @@ export async function sendDonationReceipt(session: Stripe.Checkout.Session) {
 
   const frequency =
     session.metadata?.frequency === "monthly" ? "monthly" : "once";
+  const amount = formatSessionAmount(session);
+  const customerName = session.customer_details?.name || undefined;
+
   const { data, error } = await getResend().emails.send(
     {
       from: getFromAddress(),
       to: [to],
       subject: "Your Set Free Gala donation receipt",
       react: createElement(DonationReceiptEmail, {
-        amount: formatSessionAmount(session),
+        amount,
         frequency,
         customerEmail: to,
       }),
@@ -88,6 +92,55 @@ export async function sendDonationReceipt(session: Stripe.Checkout.Session) {
   }
 
   console.info(`Sent donation receipt ${data?.id} for ${session.id}.`);
+
+  await sendDonationNotification({
+    session,
+    amount,
+    frequency,
+    customerEmail: to,
+    customerName,
+  });
+}
+
+async function sendDonationNotification({
+  session,
+  amount,
+  frequency,
+  customerEmail,
+  customerName,
+}: {
+  session: Stripe.Checkout.Session;
+  amount: string;
+  frequency: "once" | "monthly";
+  customerEmail: string;
+  customerName?: string;
+}) {
+  const notifyEmail = process.env.NOTIFY_EMAIL;
+
+  if (!notifyEmail) {
+    return;
+  }
+
+  const monthly = frequency === "monthly";
+  const { error } = await getResend().emails.send(
+    {
+      from: getFromAddress(),
+      to: [notifyEmail],
+      subject: `New Set Free Gala donation: ${amount}${monthly ? "/mo" : ""}`,
+      react: createElement(DonationNotifyEmail, {
+        amount,
+        frequency,
+        customerEmail,
+        customerName,
+        sessionId: session.id,
+      }),
+    },
+    { idempotencyKey: `notify/${session.id}` }
+  );
+
+  if (error) {
+    console.error("Failed to send donation notification:", error);
+  }
 }
 
 export async function sendTicketReceipt(session: Stripe.Checkout.Session) {
@@ -109,7 +162,7 @@ export async function sendTicketReceipt(session: Stripe.Checkout.Session) {
     {
       from: getFromAddress(),
       to: [to],
-      subject: "Your Set Free Gala ticket receipt",
+      subject: `Your Set Free Gala ${productTitle.toLowerCase()} receipt`,
       react: createElement(TicketReceiptEmail, {
         productTitle,
         quantity: Number.isFinite(quantity) ? quantity : 1,
