@@ -113,7 +113,15 @@ export function Tickets() {
           </div>
         </Reveal>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <p className="mt-14 text-center text-[11px] uppercase tracking-[0.35em] text-paper-dim">
+          Choose an option below
+        </p>
+
+        <div
+          className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          role="radiogroup"
+          aria-label="Ticket and sponsorship options"
+        >
           {ticketProducts.map((tier, i) => {
             const selected = tier.id === selectedId;
 
@@ -121,19 +129,33 @@ export function Tickets() {
               <Reveal key={tier.id} delay={i * 100}>
                 <button
                   type="button"
+                  role="radio"
+                  aria-checked={selected}
                   onClick={() => {
                     setSelectedId(tier.id);
                     setQuantity(1);
                     setError(null);
                   }}
-                  aria-pressed={selected}
-                  className={`deco-frame flex h-full w-full flex-col gap-6 bg-ink p-8 pt-10 text-center transition-colors hover:bg-ink-soft ${
-                    selected ? "ring-1 ring-gold" : ""
+                  className={`deco-frame relative flex h-full w-full flex-col gap-6 p-8 pt-12 text-center transition-all duration-300 ${
+                    selected
+                      ? "scale-[1.02] border-gold bg-gold/10 ring-1 ring-gold"
+                      : "bg-ink opacity-50 hover:opacity-80 hover:bg-ink-soft"
                   }`}
                 >
                   <span
-                    className={`mx-auto -mt-2 text-[10px] uppercase tracking-[0.35em] ${
-                      tier.requiresSponsorLogo ? "text-gold" : "text-paper-dim"
+                    className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-3 py-1 text-[9px] uppercase tracking-[0.35em] transition-opacity ${
+                      selected
+                        ? "bg-gold text-ink opacity-100"
+                        : "pointer-events-none opacity-0"
+                    }`}
+                  >
+                    Selected
+                  </span>
+                  <span
+                    className={`mx-auto text-[10px] uppercase tracking-[0.35em] ${
+                      selected || tier.requiresSponsorLogo
+                        ? "text-gold"
+                        : "text-paper-dim"
                     }`}
                   >
                     {tier.categoryLabel}
@@ -141,11 +163,22 @@ export function Tickets() {
                   <span className="gold-text font-display text-5xl">
                     {tier.priceLabel}
                   </span>
-                  <span className="font-display text-lg uppercase tracking-[0.25em] text-paper">
+                  <span
+                    className={`font-display text-lg uppercase tracking-[0.25em] ${
+                      selected ? "text-gold-bright" : "text-paper"
+                    }`}
+                  >
                     {tier.title}
                   </span>
                   <span className="text-sm leading-relaxed text-paper-dim">
                     {tier.detail}
+                  </span>
+                  <span
+                    className={`mt-auto text-[10px] uppercase tracking-[0.3em] ${
+                      selected ? "text-gold" : "text-paper-dim/70"
+                    }`}
+                  >
+                    {selected ? "Ready to purchase ↓" : "Tap to select"}
                   </span>
                 </button>
               </Reveal>
@@ -154,15 +187,24 @@ export function Tickets() {
         </div>
 
         <Reveal delay={200}>
-          <div className="mx-auto mt-16 max-w-3xl border border-line bg-ink p-8 md:p-12">
+          <div
+            id="ticket-checkout"
+            className="mx-auto mt-16 max-w-3xl border border-gold/50 bg-ink p-8 shadow-[0_0_0_1px_rgba(212,175,94,0.2)] md:p-12"
+          >
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.35em] text-gold">
-                  Selected
+                  Your Selection
                 </p>
-                <span className="font-display text-lg uppercase tracking-[0.25em] text-paper">
+                <p className="mt-2 font-display text-2xl uppercase tracking-[0.18em] text-paper md:text-3xl">
                   {selectedProduct.title}
-                </span>
+                </p>
+                <p className="mt-2 font-display text-xl text-gold">
+                  {selectedProduct.priceLabel}
+                  {selectedProduct.quantityAllowed && quantity > 1
+                    ? ` × ${quantity}`
+                    : ""}
+                </p>
                 <p className="mt-3 max-w-lg text-sm leading-relaxed text-paper-dim">
                   {selectedProduct.detail}
                 </p>
@@ -230,14 +272,22 @@ export function Tickets() {
               </p>
             )}
 
-            <div className="mt-8 flex flex-col items-center gap-4 text-center">
+            <div className="mt-10 flex flex-col items-center gap-4 border-t border-line pt-8 text-center">
+              <p className="text-[11px] uppercase tracking-[0.35em] text-paper-dim">
+                Total due today
+              </p>
+              <p className="gold-text font-display text-4xl md:text-5xl">
+                {totalLabel}
+              </p>
               <button
                 type="button"
                 onClick={submit}
                 disabled={pending || quantity < 1 || quantity > 20}
                 className="w-full bg-gold px-10 py-5 text-[11px] uppercase tracking-[0.3em] text-ink transition-opacity hover:opacity-80 disabled:opacity-50 md:w-auto"
               >
-                {pending ? "Opening Secure Checkout..." : `Buy ${totalLabel}`}
+                {pending
+                  ? "Opening Secure Checkout..."
+                  : `Buy ${selectedProduct.title} — ${totalLabel}`}
               </button>
               <p className="max-w-xl text-xs leading-relaxed text-paper-dim">
                 You&rsquo;ll be redirected to Stripe&rsquo;s secure checkout.
