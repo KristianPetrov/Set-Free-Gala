@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { createTicketSession } from "@/app/actions";
 import { ticketProducts, type TicketProductId } from "@/lib/products";
 import { Reveal } from "./Reveal";
@@ -22,6 +22,7 @@ function validateLogo(file: File | null) {
 }
 
 export function Tickets() {
+  const checkoutRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<TicketProductId>("ticket");
   const [quantity, setQuantity] = useState(1);
   const [sponsorName, setSponsorName] = useState("");
@@ -38,6 +39,31 @@ export function Tickets() {
     currency: "USD",
     maximumFractionDigits: 0,
   });
+
+  function selectProduct(id: TicketProductId) {
+    setSelectedId(id);
+    setQuantity(1);
+    setError(null);
+
+    // On smaller screens the buy panel sits below the fold — scroll it into view.
+    requestAnimationFrame(() => {
+      const checkout = checkoutRef.current;
+      if (!checkout) return;
+
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      const checkoutTop = checkout.getBoundingClientRect().top;
+      const needsScroll = checkoutTop > window.innerHeight * 0.45;
+
+      if (needsScroll) {
+        checkout.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+    });
+  }
 
   function submit() {
     setError(null);
@@ -113,12 +139,12 @@ export function Tickets() {
           </div>
         </Reveal>
 
-        <p className="mt-14 text-center text-[11px] uppercase tracking-[0.35em] text-paper-dim">
+        <p className="mt-10 text-center text-[11px] uppercase tracking-[0.35em] text-paper-dim md:mt-14">
           Choose an option below
         </p>
 
         <div
-          className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+          className="mt-4 grid grid-cols-2 gap-3 md:mt-6 md:gap-6 lg:grid-cols-4"
           role="radiogroup"
           aria-label="Ticket and sponsorship options"
         >
@@ -131,19 +157,15 @@ export function Tickets() {
                   type="button"
                   role="radio"
                   aria-checked={selected}
-                  onClick={() => {
-                    setSelectedId(tier.id);
-                    setQuantity(1);
-                    setError(null);
-                  }}
-                  className={`deco-frame relative flex h-full w-full flex-col gap-6 p-8 pt-12 text-center transition-all duration-300 ${
+                  onClick={() => selectProduct(tier.id)}
+                  className={`deco-frame relative flex h-full w-full flex-col gap-3 p-4 pt-8 text-center transition-all duration-300 md:gap-6 md:p-8 md:pt-12 ${
                     selected
                       ? "scale-[1.02] border-gold bg-gold/10 ring-1 ring-gold"
                       : "bg-ink opacity-50 hover:opacity-80 hover:bg-ink-soft"
                   }`}
                 >
                   <span
-                    className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-3 py-1 text-[9px] uppercase tracking-[0.35em] transition-opacity ${
+                    className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-2 py-1 text-[8px] uppercase tracking-[0.3em] transition-opacity md:px-3 md:text-[9px] md:tracking-[0.35em] ${
                       selected
                         ? "bg-gold text-ink opacity-100"
                         : "pointer-events-none opacity-0"
@@ -152,7 +174,7 @@ export function Tickets() {
                     Selected
                   </span>
                   <span
-                    className={`mx-auto text-[10px] uppercase tracking-[0.35em] ${
+                    className={`mx-auto text-[9px] uppercase tracking-[0.25em] md:text-[10px] md:tracking-[0.35em] ${
                       selected || tier.requiresSponsorLogo
                         ? "text-gold"
                         : "text-paper-dim"
@@ -160,25 +182,25 @@ export function Tickets() {
                   >
                     {tier.categoryLabel}
                   </span>
-                  <span className="gold-text font-display text-5xl">
+                  <span className="gold-text font-display text-3xl md:text-5xl">
                     {tier.priceLabel}
                   </span>
                   <span
-                    className={`font-display text-lg uppercase tracking-[0.25em] ${
+                    className={`font-display text-sm uppercase tracking-[0.18em] md:text-lg md:tracking-[0.25em] ${
                       selected ? "text-gold-bright" : "text-paper"
                     }`}
                   >
                     {tier.title}
                   </span>
-                  <span className="text-sm leading-relaxed text-paper-dim">
+                  <span className="hidden text-sm leading-relaxed text-paper-dim md:block">
                     {tier.detail}
                   </span>
                   <span
-                    className={`mt-auto text-[10px] uppercase tracking-[0.3em] ${
+                    className={`mt-auto text-[9px] uppercase tracking-[0.25em] md:text-[10px] md:tracking-[0.3em] ${
                       selected ? "text-gold" : "text-paper-dim/70"
                     }`}
                   >
-                    {selected ? "Ready to purchase ↓" : "Tap to select"}
+                    {selected ? "Checkout ↓" : "Tap to select"}
                   </span>
                 </button>
               </Reveal>
@@ -189,7 +211,8 @@ export function Tickets() {
         <Reveal delay={200}>
           <div
             id="ticket-checkout"
-            className="mx-auto mt-16 max-w-3xl border border-gold/50 bg-ink p-8 shadow-[0_0_0_1px_rgba(212,175,94,0.2)] md:p-12"
+            ref={checkoutRef}
+            className="mx-auto mt-8 scroll-mt-24 max-w-3xl border border-gold/50 bg-ink p-6 shadow-[0_0_0_1px_rgba(212,175,94,0.2)] md:mt-16 md:p-12"
           >
             <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
               <div>
