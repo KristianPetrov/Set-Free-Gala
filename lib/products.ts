@@ -16,6 +16,9 @@ export type TicketProduct = {
   quantityAllowed: boolean;
 };
 
+/** When true, ticket Stripe checkout is disabled site-wide. */
+export const ticketsSoldOut = true;
+
 export const ticketProducts = [
   {
     id: "ticket",

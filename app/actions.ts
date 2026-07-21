@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getTicketProduct } from "@/lib/products";
+import { getTicketProduct, ticketsSoldOut } from "@/lib/products";
 import { getStripe } from "@/lib/stripe";
 
 const MIN_AMOUNT_CENTS = 100; // $1
@@ -65,6 +65,10 @@ export async function createDonationSession(formData: FormData) {
 }
 
 export async function createTicketSession(formData: FormData) {
+  if (ticketsSoldOut) {
+    throw new Error("Tickets are sold out.");
+  }
+
   const product = getTicketProduct(formData.get("productId"));
 
   if (!product) {
