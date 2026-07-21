@@ -73,7 +73,7 @@ export function Hero() {
             href="#tickets"
             className="bg-gold px-8 py-4 text-[11px] uppercase tracking-[0.3em] text-ink transition-opacity hover:opacity-80"
           >
-            Tickets &amp; Tables
+            Tickets Sold Out
           </a>
           <a
             href="#donate"

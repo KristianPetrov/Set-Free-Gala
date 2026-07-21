@@ -2,7 +2,11 @@
 
 import { useRef, useState, useTransition } from "react";
 import { createTicketSession } from "@/app/actions";
-import { ticketProducts, type TicketProductId } from "@/lib/products";
+import {
+  ticketProducts,
+  ticketsSoldOut,
+  type TicketProductId,
+} from "@/lib/products";
 import { Reveal } from "./Reveal";
 
 function validateLogo(file: File | null) {
@@ -21,7 +25,92 @@ function validateLogo(file: File | null) {
   return null;
 }
 
-export function Tickets() {
+function SoldOutTickets() {
+  return (
+    <section
+      id="tickets"
+      className="scroll-mt-24 border-t border-line bg-ink-soft"
+    >
+      <div className="mx-auto max-w-6xl px-6 py-32">
+        <Reveal>
+          <p className="text-center text-[11px] uppercase tracking-[0.5em] text-gold">
+            03 — Tickets &amp; Sponsorships
+          </p>
+          <h2 className="gold-text mx-auto mt-8 max-w-3xl text-center font-display text-4xl uppercase leading-tight tracking-[0.06em] md:text-6xl">
+            Sold Out
+          </h2>
+          <div className="deco-divider mx-auto mt-8 max-w-xs text-sm" aria-hidden>
+            ◆
+          </div>
+          <p className="mx-auto mt-10 max-w-xl text-center text-sm leading-relaxed text-paper-dim md:text-base">
+            Every ticket, table, and sponsorship for the Set Free Gala has been
+            claimed. Thank you for the overwhelming support.
+          </p>
+        </Reveal>
+
+        <div className="mt-10 grid grid-cols-2 gap-3 md:mt-14 md:gap-6 lg:grid-cols-4">
+          {ticketProducts.map((tier, i) => (
+            <Reveal key={tier.id} delay={i * 100}>
+              <div className="deco-frame relative flex h-full w-full flex-col gap-3 bg-ink p-4 pt-8 text-center opacity-60 md:gap-6 md:p-8 md:pt-12">
+                <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 bg-gold px-2 py-1 text-[8px] uppercase tracking-[0.3em] text-ink md:px-3 md:text-[9px] md:tracking-[0.35em]">
+                  Sold Out
+                </span>
+                <span
+                  className={`mx-auto text-[9px] uppercase tracking-[0.25em] md:text-[10px] md:tracking-[0.35em] ${
+                    tier.requiresSponsorLogo ? "text-gold" : "text-paper-dim"
+                  }`}
+                >
+                  {tier.categoryLabel}
+                </span>
+                <span className="gold-text font-display text-3xl md:text-5xl">
+                  {tier.priceLabel}
+                </span>
+                <span className="font-display text-sm uppercase tracking-[0.18em] text-paper md:text-lg md:tracking-[0.25em]">
+                  {tier.title}
+                </span>
+                <span className="hidden text-sm leading-relaxed text-paper-dim md:block">
+                  {tier.detail}
+                </span>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal delay={200}>
+          <div className="mx-auto mt-8 max-w-3xl border border-gold/50 bg-ink p-6 text-center shadow-[0_0_0_1px_rgba(212,175,94,0.2)] md:mt-16 md:p-12">
+            <p className="text-[10px] uppercase tracking-[0.35em] text-gold">
+              Online Sales Closed
+            </p>
+            <p className="mt-4 font-display text-2xl uppercase tracking-[0.18em] text-paper md:text-3xl">
+              No Tickets Remaining
+            </p>
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-paper-dim">
+              Stripe checkout for tickets and sponsorships is no longer
+              available. If you already have a reservation, we can&rsquo;t wait
+              to see you there.
+            </p>
+            <a
+              href="sms:+17144004573"
+              className="mt-8 inline-block text-[10px] uppercase tracking-[0.3em] text-gold underline underline-offset-4"
+            >
+              Questions? Text +1 (714) 400-4573
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={250}>
+          <div className="mt-12 text-center">
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-paper-dim">
+              A silent auction runs throughout the evening — come ready to bid.
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function OpenTickets() {
   const checkoutRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<TicketProductId>("ticket");
   const [quantity, setQuantity] = useState(1);
@@ -336,4 +425,12 @@ export function Tickets() {
       </div>
     </section>
   );
+}
+
+export function Tickets() {
+  if (ticketsSoldOut) {
+    return <SoldOutTickets />;
+  }
+
+  return <OpenTickets />;
 }

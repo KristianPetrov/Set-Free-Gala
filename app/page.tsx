@@ -9,7 +9,7 @@ import { Evening } from "@/components/Evening";
 import { Impact } from "@/components/Impact";
 import { DonateSection } from "@/components/DonateSection";
 import { Footer } from "@/components/Footer";
-import { ticketProducts } from "@/lib/products";
+import { ticketProducts, ticketsSoldOut } from "@/lib/products";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -47,7 +47,9 @@ const jsonLd = {
         name: product.title,
         price: String(product.unitAmount / 100),
         priceCurrency: "USD",
-        availability: "https://schema.org/InStock",
+        availability: ticketsSoldOut
+          ? "https://schema.org/SoldOut"
+          : "https://schema.org/InStock",
         url: `${siteUrl}/#tickets`,
         validFrom: "2026-06-01T00:00:00-07:00",
       })),
