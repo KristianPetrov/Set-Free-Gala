@@ -16,6 +16,14 @@ export type TicketProduct = {
   quantityAllowed: boolean;
 };
 
+export const raffleProduct = {
+  title: "Fieldy Signature Bass Raffle Ticket",
+  unitAmount: 2_500,
+  priceLabel: "$25",
+  detail:
+    "One entry to win an Ibanez GIO bass signed by Fieldy of Korn.",
+} as const;
+
 export const ticketProducts = [
   {
     id: "ticket",

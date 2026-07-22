@@ -66,14 +66,19 @@ export function Hero() {
         </div>
 
         <div
-          className="mt-12 flex animate-fade-up flex-wrap justify-center gap-4"
+          className="mx-auto mt-12 flex max-w-2xl animate-fade-up flex-col items-center gap-4"
           style={{ animationDelay: "680ms" }}
         >
           <a
-            href="#tickets"
-            className="bg-gold px-8 py-4 text-[11px] uppercase tracking-[0.3em] text-ink transition-opacity hover:opacity-80"
+            href="#raffle"
+            className="flex w-full flex-col bg-gold px-8 py-6 text-ink transition-colors hover:bg-gold-bright"
           >
-            Tickets &amp; Tables
+            <span className="font-display text-sm uppercase tracking-[0.22em] md:text-base md:tracking-[0.3em]">
+              Buy Raffle Tickets · $25 Each
+            </span>
+            <span className="mt-2 text-[9px] uppercase tracking-[0.3em] opacity-75 md:text-[10px]">
+              Win Fieldy&rsquo;s Signed Bass
+            </span>
           </a>
           <a
             href="#donate"

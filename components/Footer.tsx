@@ -24,6 +24,12 @@ export function Footer() {
         <div className="mt-16 flex flex-col gap-8 border-t border-line pt-8 text-[11px] uppercase tracking-[0.25em] text-paper-dim md:flex-row md:items-center md:justify-between">
           <span>Set Free&rsquo;s 1st Gala · Presented by Magic House</span>
           <div className="flex gap-8">
+            <a
+              href="#raffle"
+              className="transition-colors hover:text-gold-bright"
+            >
+              Bass Raffle
+            </a>
             <a href="#about" className="transition-colors hover:text-gold-bright">
               The Cause
             </a>

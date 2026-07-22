@@ -2,12 +2,32 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getTicketProduct } from "@/lib/products";
+import { getTicketProduct, raffleProduct } from "@/lib/products";
 import { getStripe } from "@/lib/stripe";
 
 const MIN_AMOUNT_CENTS = 100; // $1
 const MAX_AMOUNT_CENTS = 99_999_900; // $999,999
 const MAX_TICKET_QUANTITY = 20;
+const MAX_RAFFLE_QUANTITY = 100;
+
+function getRequiredText(
+  formData: FormData,
+  field: string,
+  label: string,
+  maxLength: number
+) {
+  const value = String(formData.get(field) ?? "").trim();
+
+  if (!value) {
+    throw new Error(`${label} is required.`);
+  }
+
+  if (value.length > maxLength) {
+    throw new Error(`${label} is too long.`);
+  }
+
+  return value;
+}
 
 async function getOrigin() {
   return (await headers()).get("origin") ?? "http://localhost:3000";
@@ -122,6 +142,77 @@ export async function createTicketSession(formData: FormData) {
 
   if (!session.url) {
     throw new Error("Unable to start checkout. Please try again.");
+  }
+
+  redirect(session.url);
+}
+
+export async function createRaffleSession(formData: FormData) {
+  const quantity = Number.parseInt(
+    String(formData.get("quantity") ?? "1"),
+    10
+  );
+
+  if (
+    !Number.isInteger(quantity) ||
+    quantity < 1 ||
+    quantity > MAX_RAFFLE_QUANTITY
+  ) {
+    throw new Error(
+      `Raffle ticket quantity must be between 1 and ${MAX_RAFFLE_QUANTITY}.`
+    );
+  }
+
+  const buyerName = getRequiredText(formData, "fullName", "Full name", 100);
+  const buyerEmail = getRequiredText(
+    formData,
+    "email",
+    "Email",
+    254
+  ).toLowerCase();
+  const buyerPhone = getRequiredText(formData, "phone", "Phone number", 30);
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail);
+  const phoneDigitCount = buyerPhone.replace(/\D/g, "").length;
+
+  if (!emailIsValid) {
+    throw new Error("Please enter a valid email address.");
+  }
+
+  if (phoneDigitCount < 7 || phoneDigitCount > 15) {
+    throw new Error("Please enter a valid phone number.");
+  }
+
+  const origin = await getOrigin();
+  const session = await getStripe().checkout.sessions.create({
+    mode: "payment",
+    customer_email: buyerEmail,
+    line_items: [
+      {
+        quantity,
+        price_data: {
+          currency: "usd",
+          unit_amount: raffleProduct.unitAmount,
+          product_data: {
+            name: raffleProduct.title,
+            description: raffleProduct.detail,
+          },
+        },
+      },
+    ],
+    metadata: {
+      kind: "raffle",
+      productTitle: raffleProduct.title,
+      quantity: String(quantity),
+      buyerName,
+      buyerEmail,
+      buyerPhone,
+    },
+    success_url: `${origin}/raffle/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/#raffle`,
+  });
+
+  if (!session.url) {
+    throw new Error("Unable to start raffle checkout. Please try again.");
   }
 
   redirect(session.url);

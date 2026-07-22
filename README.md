@@ -1,6 +1,6 @@
 # Set Free Gala
 
-A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stripe-powered donations, ticket/table checkout, sponsorship logo uploads, and Resend receipt emails.
+A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stripe-powered donations, ticket/table checkout, a Fieldy signature bass raffle, sponsorship logo uploads, and Resend receipt emails.
 
 ## Stack
 
@@ -53,6 +53,13 @@ A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stri
 - Sponsor tiers require a sponsor/company name and a PNG or JPG logo upload. Logos are stored in Vercel Blob before checkout.
 - `createTicketSession` creates a Stripe Checkout Session and stores order details in session metadata.
 - After payment, Stripe redirects to `/tickets/success`, and the webhook sends the receipt email.
+
+## How raffle checkout works
+
+- The Fieldy signature bass raffle is $25 per entry and supports multiple tickets in one order.
+- Buyers provide their full name, phone number, and email before Stripe Checkout.
+- Buyer details and ticket quantity are stored in Stripe Checkout metadata.
+- After payment, Stripe redirects to `/raffle/success`; the webhook emails the buyer a confirmation and sends the order details to `NOTIFY_EMAIL`.
 
 ## Stripe webhooks
 

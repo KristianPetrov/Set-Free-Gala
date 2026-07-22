@@ -5,6 +5,7 @@ import { Resend } from "resend";
 import type Stripe from "stripe";
 import { DonationNotifyEmail } from "@/emails/donation-notify";
 import { DonationReceiptEmail } from "@/emails/donation-receipt";
+import { RaffleReceiptEmail } from "@/emails/raffle-receipt";
 import { TicketReceiptEmail } from "@/emails/ticket-receipt";
 import { formatUsd, getTicketProduct } from "@/lib/products";
 
@@ -239,5 +240,72 @@ async function sendOrderNotification({
 
   if (error) {
     console.error("Failed to send order notification:", error);
+  }
+}
+
+export async function sendRaffleReceipt(session: Stripe.Checkout.Session) {
+  const buyerEmail =
+    session.metadata?.buyerEmail || getCustomerEmail(session);
+
+  if (!buyerEmail) {
+    console.warn(`No customer email for raffle session ${session.id}.`);
+    return;
+  }
+
+  const buyerName = session.metadata?.buyerName || "Raffle supporter";
+  const buyerPhone = session.metadata?.buyerPhone || "Not provided";
+  const parsedQuantity = Number.parseInt(session.metadata?.quantity ?? "1", 10);
+  const quantity = Number.isFinite(parsedQuantity) ? parsedQuantity : 1;
+  const amount = formatSessionAmount(session);
+
+  const { data, error } = await getResend().emails.send(
+    {
+      from: getFromAddress(),
+      to: [buyerEmail],
+      subject: "Your Fieldy signature bass raffle purchase",
+      react: createElement(RaffleReceiptEmail, {
+        buyerName,
+        quantity,
+        amount,
+        customerEmail: buyerEmail,
+      }),
+    },
+    { idempotencyKey: `raffle-receipt/${session.id}` }
+  );
+
+  if (error) {
+    console.error("Failed to send raffle receipt:", error);
+  } else {
+    console.info(`Sent raffle receipt ${data?.id} for ${session.id}.`);
+  }
+
+  const notifyEmail = process.env.NOTIFY_EMAIL;
+
+  if (!notifyEmail) {
+    return;
+  }
+
+  const lines = [
+    `<p><strong>Raffle:</strong> Fieldy Signature Bass</p>`,
+    `<p><strong>Name:</strong> ${escapeHtml(buyerName)}</p>`,
+    `<p><strong>Phone:</strong> ${escapeHtml(buyerPhone)}</p>`,
+    `<p><strong>Email:</strong> ${escapeHtml(buyerEmail)}</p>`,
+    `<p><strong>Tickets:</strong> ${quantity}</p>`,
+    `<p><strong>Total:</strong> ${escapeHtml(amount)}</p>`,
+    `<p><strong>Stripe session:</strong> ${escapeHtml(session.id)}</p>`,
+  ].join("");
+
+  const { error: notifyError } = await getResend().emails.send(
+    {
+      from: getFromAddress(),
+      to: [notifyEmail],
+      subject: `New bass raffle purchase: ${quantity} ticket${quantity === 1 ? "" : "s"} — ${buyerName}`,
+      html: lines,
+    },
+    { idempotencyKey: `raffle-notify/${session.id}` }
+  );
+
+  if (notifyError) {
+    console.error("Failed to send raffle notification:", notifyError);
   }
 }

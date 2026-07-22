@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { sendDonationReceipt, sendTicketReceipt } from "@/lib/email";
+import {
+  sendDonationReceipt,
+  sendRaffleReceipt,
+  sendTicketReceipt,
+} from "@/lib/email";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -41,6 +45,8 @@ export async function POST(request: Request) {
         await sendDonationReceipt(session);
       } else if (session.metadata?.kind === "ticket") {
         await sendTicketReceipt(session);
+      } else if (session.metadata?.kind === "raffle") {
+        await sendRaffleReceipt(session);
       } else {
         console.info(`Ignoring Checkout Session ${session.id} without kind.`);
       }

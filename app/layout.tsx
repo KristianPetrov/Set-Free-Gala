@@ -52,6 +52,8 @@ export const metadata: Metadata = {
     "black tie",
     "outreach",
     "donations",
+    "Fieldy bass raffle",
+    "Korn signed bass",
   ],
   authors: [{ name: "Set Free" }],
   creator: "Set Free",
