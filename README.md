@@ -1,6 +1,6 @@
 # Set Free Gala
 
-A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stripe-powered donations, ticket/table checkout, a Fieldy signature bass raffle, sponsorship logo uploads, and Resend receipt emails.
+A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stripe-powered donations, ticket/table checkout, two $25 prize raffles, sponsorship logo uploads, and Resend receipt emails.
 
 ## Stack
 
@@ -56,9 +56,9 @@ A black-and-white, editorial-style Next.js site for the Set Free Gala, with Stri
 
 ## How raffle checkout works
 
-- The Fieldy signature bass raffle is $25 per entry and supports multiple tickets in one order.
+- Buyers choose the Fieldy signed bass or the Massage Envy Wellness Basket raffle. Each is $25 per entry and supports multiple tickets in one order.
 - Buyers provide their full name, phone number, and email before Stripe Checkout.
-- Buyer details and ticket quantity are stored in Stripe Checkout metadata.
+- The selected prize, buyer details, and ticket quantity are stored in Stripe Checkout metadata.
 - After payment, Stripe redirects to `/raffle/success`; the webhook emails the buyer a confirmation and sends the order details to `NOTIFY_EMAIL`.
 
 ## Stripe webhooks

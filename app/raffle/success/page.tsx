@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getRaffleProduct } from "@/lib/products";
 import { getStripe } from "@/lib/stripe";
 
 export const metadata: Metadata = {
@@ -41,6 +42,11 @@ export default async function RaffleSuccessPage({
   const email =
     session.metadata.buyerEmail || session.customer_details?.email;
   const buyerName = session.metadata.buyerName;
+  const product = getRaffleProduct(session.metadata.productId ?? null);
+  const productTitle =
+    product?.shortTitle ??
+    session.metadata.productTitle ??
+    "Fieldy’s Signed Bass";
 
   return (
     <main className="grain flex min-h-svh flex-col items-center justify-center px-6 py-24 text-center">
@@ -59,7 +65,7 @@ export default async function RaffleSuccessPage({
 
       <div className="mt-10 border border-line px-8 py-6">
         <p className="text-[10px] uppercase tracking-[0.35em] text-paper-dim">
-          Fieldy Signature Bass
+          {productTitle}
         </p>
         <p className="mt-3 font-display text-2xl uppercase tracking-[0.12em]">
           {safeQuantity} Raffle {safeQuantity === 1 ? "Ticket" : "Tickets"}

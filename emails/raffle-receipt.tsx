@@ -4,6 +4,7 @@ import { EmailLayout } from "./components/email-layout";
 
 export type RaffleReceiptEmailProps = {
   buyerName: string;
+  productTitle: string;
   quantity: number;
   amount: string;
   customerEmail: string;
@@ -11,12 +12,13 @@ export type RaffleReceiptEmailProps = {
 
 export function RaffleReceiptEmail({
   buyerName,
+  productTitle,
   quantity,
   amount,
   customerEmail,
 }: RaffleReceiptEmailProps) {
   return (
-    <EmailLayout preview="Your Fieldy signature bass raffle purchase is confirmed.">
+    <EmailLayout preview={`Your ${productTitle} raffle purchase is confirmed.`}>
       <Heading
         as="h1"
         className="m-0 font-display text-[32px] font-normal uppercase leading-[42px] tracking-[2px] text-gold"
@@ -32,7 +34,7 @@ export function RaffleReceiptEmail({
           Raffle Purchase Confirmed
         </Text>
         <Text className="m-0 mt-[8px] font-display text-[22px] uppercase leading-[32px] tracking-[1px] text-paper">
-          Fieldy Signature Bass
+          {productTitle}
         </Text>
         <Text className="m-0 mt-[10px] text-[14px] leading-[24px] text-paper-dim">
           Raffle tickets: {quantity}
@@ -58,6 +60,7 @@ export function RaffleReceiptEmail({
 
 RaffleReceiptEmail.PreviewProps = {
   buyerName: "Jordan Guest",
+  productTitle: "Fieldy’s Signed Bass",
   quantity: 3,
   amount: "$75",
   customerEmail: "guest@example.com",

@@ -7,7 +7,11 @@ import { DonationNotifyEmail } from "@/emails/donation-notify";
 import { DonationReceiptEmail } from "@/emails/donation-receipt";
 import { RaffleReceiptEmail } from "@/emails/raffle-receipt";
 import { TicketReceiptEmail } from "@/emails/ticket-receipt";
-import { formatUsd, getTicketProduct } from "@/lib/products";
+import {
+  formatUsd,
+  getRaffleProduct,
+  getTicketProduct,
+} from "@/lib/products";
 
 let resend: Resend | null = null;
 
@@ -254,6 +258,11 @@ export async function sendRaffleReceipt(session: Stripe.Checkout.Session) {
 
   const buyerName = session.metadata?.buyerName || "Raffle supporter";
   const buyerPhone = session.metadata?.buyerPhone || "Not provided";
+  const product = getRaffleProduct(session.metadata?.productId ?? null);
+  const productTitle =
+    product?.shortTitle ??
+    session.metadata?.productTitle ??
+    "Fieldy’s Signed Bass";
   const parsedQuantity = Number.parseInt(session.metadata?.quantity ?? "1", 10);
   const quantity = Number.isFinite(parsedQuantity) ? parsedQuantity : 1;
   const amount = formatSessionAmount(session);
@@ -262,9 +271,10 @@ export async function sendRaffleReceipt(session: Stripe.Checkout.Session) {
     {
       from: getFromAddress(),
       to: [buyerEmail],
-      subject: "Your Fieldy signature bass raffle purchase",
+      subject: `Your ${productTitle} raffle purchase`,
       react: createElement(RaffleReceiptEmail, {
         buyerName,
+        productTitle,
         quantity,
         amount,
         customerEmail: buyerEmail,
@@ -286,7 +296,7 @@ export async function sendRaffleReceipt(session: Stripe.Checkout.Session) {
   }
 
   const lines = [
-    `<p><strong>Raffle:</strong> Fieldy Signature Bass</p>`,
+    `<p><strong>Raffle:</strong> ${escapeHtml(productTitle)}</p>`,
     `<p><strong>Name:</strong> ${escapeHtml(buyerName)}</p>`,
     `<p><strong>Phone:</strong> ${escapeHtml(buyerPhone)}</p>`,
     `<p><strong>Email:</strong> ${escapeHtml(buyerEmail)}</p>`,
@@ -299,7 +309,7 @@ export async function sendRaffleReceipt(session: Stripe.Checkout.Session) {
     {
       from: getFromAddress(),
       to: [notifyEmail],
-      subject: `New bass raffle purchase: ${quantity} ticket${quantity === 1 ? "" : "s"} — ${buyerName}`,
+      subject: `New ${productTitle} raffle purchase: ${quantity} ticket${quantity === 1 ? "" : "s"} — ${buyerName}`,
       html: lines,
     },
     { idempotencyKey: `raffle-notify/${session.id}` }

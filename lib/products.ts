@@ -16,13 +16,59 @@ export type TicketProduct = {
   quantityAllowed: boolean;
 };
 
-export const raffleProduct = {
-  title: "Fieldy Signature Bass Raffle Ticket",
-  unitAmount: 2_500,
-  priceLabel: "$25",
-  detail:
-    "One entry to win an Ibanez GIO bass signed by Fieldy of Korn.",
-} as const;
+export type RaffleProductId =
+  | "fieldy_bass"
+  | "wellness_spa";
+
+export type RaffleProduct = {
+  id: RaffleProductId;
+  title: string;
+  shortTitle: string;
+  unitAmount: number;
+  priceLabel: string;
+  detail: string;
+  imageSrc: string;
+  imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
+};
+
+export const raffleProducts = [
+  {
+    id: "fieldy_bass",
+    title: "Fieldy Signed Bass Raffle Ticket",
+    shortTitle: "Fieldy’s Signed Bass",
+    unitAmount: 2_500,
+    priceLabel: "$25",
+    detail: "One entry to win an Ibanez GIO bass signed by Fieldy of Korn.",
+    imageSrc: "/fieldy-bass-raffle.png",
+    imageAlt:
+      "Set Free Gala raffle flyer featuring an Ibanez GIO bass signed by Fieldy of Korn",
+    imageWidth: 1024,
+    imageHeight: 1536,
+  },
+  {
+    id: "wellness_spa",
+    title: "Massage Envy Wellness Basket Raffle Ticket",
+    shortTitle: "Massage Envy Wellness Basket",
+    unitAmount: 2_500,
+    priceLabel: "$25",
+    detail: "One entry to win a Massage Envy wellness basket.",
+    imageSrc: "/massage-envy-wellness-basket-raffle.png",
+    imageAlt:
+      "Set Free Gala raffle flyer featuring a Massage Envy wellness basket",
+    imageWidth: 1009,
+    imageHeight: 1559,
+  },
+] as const satisfies readonly RaffleProduct[];
+
+export function getRaffleProduct(id: FormDataEntryValue | null) {
+  if (typeof id !== "string") {
+    return null;
+  }
+
+  return raffleProducts.find((product) => product.id === id) ?? null;
+}
 
 export const ticketProducts = [
   {

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useTransition, type FormEvent } from "react";
 import { createRaffleSession } from "@/app/actions";
-import { raffleProduct } from "@/lib/products";
+import { raffleProducts, type RaffleProductId } from "@/lib/products";
 import { Reveal } from "./Reveal";
 
 const MAX_QUANTITY = 100;
@@ -13,10 +13,15 @@ function clampQuantity(value: number) {
 }
 
 export function Raffle() {
+  const [selectedProductId, setSelectedProductId] =
+    useState<RaffleProductId>("fieldy_bass");
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const total = raffleProduct.unitAmount * quantity;
+  const selectedProduct =
+    raffleProducts.find((product) => product.id === selectedProductId) ??
+    raffleProducts[0];
+  const total = selectedProduct.unitAmount * quantity;
   const totalLabel = (total / 100).toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
@@ -29,6 +34,7 @@ export function Raffle() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
+    formData.set("productId", selectedProductId);
     formData.set("quantity", String(quantity));
 
     startTransition(async () => {
@@ -48,26 +54,73 @@ export function Raffle() {
         <Reveal>
           <div className="text-center">
             <p className="text-[11px] uppercase tracking-[0.5em] text-gold">
-              One-of-a-kind raffle · $25 each
+              Two raffles · $25 per entry
             </p>
             <h2 className="gold-text mx-auto mt-6 max-w-5xl font-display text-4xl uppercase leading-tight tracking-[0.04em] md:text-6xl lg:text-7xl">
-              Win Fieldy&rsquo;s Signed Bass
+              Choose Your Prize
             </h2>
             <p className="mx-auto mt-6 max-w-2xl font-serif-italic text-xl italic leading-relaxed text-paper-dim md:text-2xl">
-              Take home an Ibanez GIO bass signed by Fieldy of Korn—and help
-              Set Free keep showing up for the community.
+              Enter one of two drawings for a special prize—and help Set Free
+              keep showing up for the community.
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-14 grid items-start gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14">
+        <Reveal>
+          <div
+            className="mx-auto mt-14 grid max-w-4xl gap-4 md:grid-cols-2"
+            role="group"
+            aria-label="Choose a raffle prize"
+          >
+            {raffleProducts.map((product, index) => {
+              const selected = product.id === selectedProductId;
+
+              return (
+                <button
+                  key={product.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setSelectedProductId(product.id)}
+                  className={`group flex min-h-64 flex-col border p-6 text-left transition-all md:p-8 ${
+                    selected
+                      ? "border-gold bg-gold text-ink shadow-[inset_0_0_0_4px_#050505,inset_0_0_0_5px_rgba(212,175,94,0.75)]"
+                      : "border-line bg-ink-soft text-paper hover:border-gold"
+                  }`}
+                >
+                  <span
+                    className={`text-[10px] uppercase tracking-[0.35em] ${
+                      selected ? "text-ink/70" : "text-gold"
+                    }`}
+                  >
+                    Raffle {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mt-5 font-display text-2xl uppercase leading-tight tracking-[0.06em] md:text-3xl">
+                    {product.shortTitle}
+                  </span>
+                  <span
+                    className={`mt-4 text-sm leading-relaxed ${
+                      selected ? "text-ink/75" : "text-paper-dim"
+                    }`}
+                  >
+                    {product.detail.replace("One entry to win ", "")}
+                  </span>
+                  <span className="mt-auto pt-8 font-display text-lg uppercase tracking-[0.12em]">
+                    {selected ? "Selected" : `Choose — ${product.priceLabel}`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </Reveal>
+
+        <div className="mx-auto mt-8 grid max-w-6xl items-start gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14">
           <Reveal>
             <div className="deco-frame bg-ink-soft p-3 md:p-5">
               <Image
-                src="/fieldy-bass-raffle.png"
-                alt="Set Free Gala raffle flyer featuring an Ibanez GIO bass signed by Fieldy of Korn"
-                width={1024}
-                height={1536}
+                src={selectedProduct.imageSrc}
+                alt={selectedProduct.imageAlt}
+                width={selectedProduct.imageWidth}
+                height={selectedProduct.imageHeight}
                 sizes="(max-width: 1024px) 100vw, 42vw"
                 className="h-auto w-full"
               />
@@ -82,10 +135,13 @@ export function Raffle() {
               <div className="flex flex-col gap-5 border-b border-line pb-8 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.35em] text-gold">
-                    Raffle entry
+                    Selected raffle
                   </p>
                   <p className="mt-3 font-display text-3xl uppercase tracking-[0.08em] text-paper md:text-4xl">
-                    {raffleProduct.priceLabel} per ticket
+                    {selectedProduct.shortTitle}
+                  </p>
+                  <p className="mt-2 text-sm text-paper-dim">
+                    {selectedProduct.priceLabel} per ticket
                   </p>
                 </div>
                 <p className="text-sm leading-relaxed text-paper-dim sm:max-w-48 sm:text-right">
@@ -212,7 +268,7 @@ export function Raffle() {
               >
                 {pending
                   ? "Opening Secure Checkout…"
-                  : `Buy ${quantity} Raffle ${ticketLabel} — ${totalLabel}`}
+                  : `Enter ${selectedProduct.shortTitle} — ${quantity} ${ticketLabel} · ${totalLabel}`}
               </button>
 
               <p className="mt-5 text-center text-xs leading-relaxed text-paper-dim">

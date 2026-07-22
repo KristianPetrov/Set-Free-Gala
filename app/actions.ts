@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getTicketProduct, raffleProduct } from "@/lib/products";
+import { getRaffleProduct, getTicketProduct } from "@/lib/products";
 import { getStripe } from "@/lib/stripe";
 
 const MIN_AMOUNT_CENTS = 100; // $1
@@ -148,6 +148,12 @@ export async function createTicketSession(formData: FormData) {
 }
 
 export async function createRaffleSession(formData: FormData) {
+  const product = getRaffleProduct(formData.get("productId"));
+
+  if (!product) {
+    throw new Error("Please choose a raffle prize.");
+  }
+
   const quantity = Number.parseInt(
     String(formData.get("quantity") ?? "1"),
     10
@@ -191,17 +197,18 @@ export async function createRaffleSession(formData: FormData) {
         quantity,
         price_data: {
           currency: "usd",
-          unit_amount: raffleProduct.unitAmount,
+          unit_amount: product.unitAmount,
           product_data: {
-            name: raffleProduct.title,
-            description: raffleProduct.detail,
+            name: product.title,
+            description: product.detail,
           },
         },
       },
     ],
     metadata: {
       kind: "raffle",
-      productTitle: raffleProduct.title,
+      productId: product.id,
+      productTitle: product.shortTitle,
       quantity: String(quantity),
       buyerName,
       buyerEmail,

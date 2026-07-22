@@ -10,7 +10,7 @@ import { Impact } from "@/components/Impact";
 import { DonateSection } from "@/components/DonateSection";
 import { Raffle } from "@/components/Raffle";
 import { Footer } from "@/components/Footer";
-import { raffleProduct, ticketProducts } from "@/lib/products";
+import { raffleProducts, ticketProducts } from "@/lib/products";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -53,15 +53,15 @@ const jsonLd = {
           url: `${siteUrl}/#tickets`,
           validFrom: "2026-06-01T00:00:00-07:00",
         })),
-        {
+        ...raffleProducts.map((product) => ({
           "@type": "Offer",
-          name: raffleProduct.title,
-          price: String(raffleProduct.unitAmount / 100),
+          name: product.title,
+          price: String(product.unitAmount / 100),
           priceCurrency: "USD",
           availability: "https://schema.org/InStock",
           url: `${siteUrl}/#raffle`,
           validFrom: "2026-07-21T00:00:00-07:00",
-        },
+        })),
       ],
     },
     {
